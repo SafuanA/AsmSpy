@@ -17,17 +17,21 @@ namespace AsmSpy.Core
             IEnumerable<FileInfo> files,
             ILogger logger,
             VisualizerOptions options,
-            string rootFileName = "")
+            string runtimeDir,
+            string rootFileName = ""
+            )
         {
             var da = new DependencyAnalyzer();
-            return da.AnalyzeInternal(files, logger, options, rootFileName);
+            return da.AnalyzeInternal(files, logger, options, runtimeDir, rootFileName);
         }
 
         public DependencyAnalyzerResult AnalyzeInternal(
             IEnumerable<FileInfo> files,
             ILogger logger,
             VisualizerOptions options,
-            string rootFileName = "")
+            string runtimeDir,
+            string rootFileName = ""
+            )
         {
             if (files == null) throw new ArgumentNullException(nameof(files));
             if (logger == null) throw new ArgumentNullException(nameof(logger));

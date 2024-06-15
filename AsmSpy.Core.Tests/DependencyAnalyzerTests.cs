@@ -1,97 +1,74 @@
-﻿using AsmSpy.Core.TestLibrary;
-
-using System;
+﻿using NUnit.Framework;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-
-using Xunit;
-using Xunit.Abstractions;
+using System.Runtime.InteropServices;
 
 namespace AsmSpy.Core.Tests
 {
+    [TestFixture]
     public class DependencyAnalyzerTests
     {
-        private readonly ITestOutputHelper output;
-        private readonly TestLogger logger;
+        private NullLogger logger;
+        private IEnumerable<FileInfo> filesToAnalyse;
+        private VisualizerOptions options = new VisualizerOptions();
 
-        private readonly IEnumerable<FileInfo> filesToAnalyse;
-        private readonly VisualizerOptions options = new VisualizerOptions();
-
-        public DependencyAnalyzerTests(ITestOutputHelper output)
+        [SetUp]
+        public void SetUp()
         {
-            this.output = output ?? throw new ArgumentNullException(nameof(output));
-            logger = new TestLogger(output);
-
+            logger = new NullLogger();
             var thisAssembly = Assembly.GetExecutingAssembly();
             var testBinDirectory = Path.GetDirectoryName(thisAssembly.Location);
-            output.WriteLine(testBinDirectory);
+            Debug.WriteLine(testBinDirectory);
 
             filesToAnalyse = Directory.GetFiles(testBinDirectory, "*.dll").Select(x => new FileInfo(x));
         }
 
-        [Fact]
+        [Test]
         public void AnalyzeShouldReturnTestAssemblies()
         {
-            var result = DependencyAnalyzer.Analyze(filesToAnalyse, logger, options);
+            var result = DependencyAnalyzer.Analyze(filesToAnalyse, logger, options, RuntimeEnvironment.GetRuntimeDirectory());
 
-            Assert.Contains(result.Assemblies.Values, x => x.AssemblyName.Name == "AsmSpy.Core");
-            Assert.Contains(result.Assemblies.Values, x => x.AssemblyName.Name == "AsmSpy.Core.Tests");
-            Assert.Contains(result.Assemblies.Values, x => x.AssemblyName.Name == "AsmSpy.Core.TestLibrary");
-            Assert.Contains(result.Assemblies.Values, x => x.AssemblyName.Name == "xunit.core");
+            Assert.That(result.Assemblies.Values.Any(x => x.AssemblyName.Name == "AsmSpy.Core"));
+            Assert.That(result.Assemblies.Values.Any(x => x.AssemblyName.Name == "AsmSpy.Core.Tests"));
+            Assert.That(result.Assemblies.Values.Any(x => x.AssemblyName.Name == "nunit.engine.core"));
         }
 
-        [Fact(Skip ="Fails in AppVeyor")]
+        [Test]
         public void AnalyzeShouldReturnSystemAssemblies()
         {
-            var result = DependencyAnalyzer.Analyze(filesToAnalyse, logger, options);
+            var result = DependencyAnalyzer.Analyze(filesToAnalyse, logger, options, RuntimeEnvironment.GetRuntimeDirectory());
 
-            Assert.Contains(result.Assemblies.Values, x => x.AssemblyName.Name == "mscorlib");
-            Assert.Contains(result.Assemblies.Values, x => x.AssemblyName.Name == "netstandard");
-            Assert.Contains(result.Assemblies.Values, x => x.AssemblyName.Name == "System");
+            Assert.That(result.Assemblies.Values.Any(x => x.AssemblyName.Name == "mscorlib"));
+            Assert.That(result.Assemblies.Values.Any(x => x.AssemblyName.Name == "netstandard"));
+            Assert.That(result.Assemblies.Values.Any(x => x.AssemblyName.Name == "System.Runtime"));
         }
 
-        [Fact]
+        [Test]
         public void AnalyzeShouldNotReturnSystemAssembliesWhenFlagIsSet()
         {
             var altOptions = new VisualizerOptions
             {
                 SkipSystem = true
             };
-            var result = DependencyAnalyzer.Analyze(filesToAnalyse, logger, altOptions);
+            var result = DependencyAnalyzer.Analyze(filesToAnalyse, logger, altOptions, RuntimeEnvironment.GetRuntimeDirectory());
 
-            Assert.DoesNotContain(result.Assemblies.Values, x => x.AssemblyName.Name == "mscorlib");
-            Assert.DoesNotContain(result.Assemblies.Values, x => x.AssemblyName.Name == "netstandard");
-            Assert.DoesNotContain(result.Assemblies.Values, x => x.AssemblyName.Name == "System");
+            Assert.That(result.Assemblies.Values.All(x => x.AssemblyName.Name != "mscorlib"));
+            Assert.That(result.Assemblies.Values.All(x => x.AssemblyName.Name != "netstandard"));
+            Assert.That(result.Assemblies.Values.All(x => x.AssemblyName.Name != "System"));
         }
 
-        [Fact]
+        [Test]
         public void AnalyzeShouldReturnDependencies()
         {
-            var exampleClass = new ExampleClass();
-            var result = DependencyAnalyzer.Analyze(filesToAnalyse, logger, options);
+            var result = DependencyAnalyzer.Analyze(filesToAnalyse, logger, options, RuntimeEnvironment.GetRuntimeDirectory());
 
             var tests = result.Assemblies.Values.Single(x => x.AssemblyName.Name == "AsmSpy.Core.Tests");
 
-            Assert.Contains(tests.References, x => x.AssemblyName.Name == "AsmSpy.Core");
-            Assert.Contains(tests.References, x => x.AssemblyName.Name == "AsmSpy.Core.TestLibrary");
-            Assert.Contains(tests.References, x => x.AssemblyName.Name == "xunit.core");
-            foreach(var reference in tests.References)
-            {
-                output.WriteLine(reference.AssemblyName.Name);
-            }
-        }
-
-        [Fact]
-        public void AnalyzeShouldReturnCorrectAssemblySource()
-        {
-            var result = DependencyAnalyzer.Analyze(filesToAnalyse, logger, options);
-
-            var tests = result.Assemblies.Values.Single(x => x.AssemblyName.Name == "AsmSpy.Core.Tests");
-
-            var mscorlib = tests.References.Single(x => x.AssemblyName.Name == "mscorlib");
-            Assert.Equal(AssemblySource.GlobalAssemblyCache, mscorlib.AssemblySource);
+            Assert.That(tests.References.Any(x => x.AssemblyName.Name == "AsmSpy.Core"));
+            Assert.That(tests.References.Any(x => x.AssemblyName.Name == "nunit.framework"));
         }
     }
 }
