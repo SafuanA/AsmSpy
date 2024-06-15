@@ -1,17 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProductVersion>8.0.30703</ProductVersion>
+    <ProductVersion>1.2.0.0</ProductVersion>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <FileVersion>1.2.0.1</FileVersion>
     <TargetFrameworks>net8.0</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Authors>Mike Hadlow, Rahul Nath</Authors>
-    <PackageId>AsmSpy.Core</PackageId>
-    <PackageLicenseUrl>https://github.com/mikehadlow/AsmSpy/blob/master/licence.txt</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/mikehadlow/AsmSpy</PackageProjectUrl>
-    <PackageReleaseNotes>Publishing to Nuget</PackageReleaseNotes>
-    <PackageTags>asmspy core</PackageTags>
     <Platforms>x64</Platforms>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
