@@ -34,7 +34,7 @@ namespace AsmSpy.Core.Tests
         [Fact]
         public void AnalyzeShouldReturnTestAssemblies()
         {
-            var result = DependencyAnalyzer.Analyze(filesToAnalyse, null, logger, options);
+            var result = DependencyAnalyzer.Analyze(filesToAnalyse, logger, options);
 
             Assert.Contains(result.Assemblies.Values, x => x.AssemblyName.Name == "AsmSpy.Core");
             Assert.Contains(result.Assemblies.Values, x => x.AssemblyName.Name == "AsmSpy.Core.Tests");
@@ -45,7 +45,7 @@ namespace AsmSpy.Core.Tests
         [Fact(Skip ="Fails in AppVeyor")]
         public void AnalyzeShouldReturnSystemAssemblies()
         {
-            var result = DependencyAnalyzer.Analyze(filesToAnalyse, null, logger, options);
+            var result = DependencyAnalyzer.Analyze(filesToAnalyse, logger, options);
 
             Assert.Contains(result.Assemblies.Values, x => x.AssemblyName.Name == "mscorlib");
             Assert.Contains(result.Assemblies.Values, x => x.AssemblyName.Name == "netstandard");
@@ -59,7 +59,7 @@ namespace AsmSpy.Core.Tests
             {
                 SkipSystem = true
             };
-            var result = DependencyAnalyzer.Analyze(filesToAnalyse, null, logger, altOptions);
+            var result = DependencyAnalyzer.Analyze(filesToAnalyse, logger, altOptions);
 
             Assert.DoesNotContain(result.Assemblies.Values, x => x.AssemblyName.Name == "mscorlib");
             Assert.DoesNotContain(result.Assemblies.Values, x => x.AssemblyName.Name == "netstandard");
@@ -70,7 +70,7 @@ namespace AsmSpy.Core.Tests
         public void AnalyzeShouldReturnDependencies()
         {
             var exampleClass = new ExampleClass();
-            var result = DependencyAnalyzer.Analyze(filesToAnalyse, null, logger, options);
+            var result = DependencyAnalyzer.Analyze(filesToAnalyse, logger, options);
 
             var tests = result.Assemblies.Values.Single(x => x.AssemblyName.Name == "AsmSpy.Core.Tests");
 
@@ -86,7 +86,7 @@ namespace AsmSpy.Core.Tests
         [Fact]
         public void AnalyzeShouldReturnCorrectAssemblySource()
         {
-            var result = DependencyAnalyzer.Analyze(filesToAnalyse, null, logger, options);
+            var result = DependencyAnalyzer.Analyze(filesToAnalyse, logger, options);
 
             var tests = result.Assemblies.Values.Single(x => x.AssemblyName.Name == "AsmSpy.Core.Tests");
 

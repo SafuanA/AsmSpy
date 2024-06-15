@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "AsmSpy.CommandLine": {
+      "commandName": "Project",
+      "commandLineArgs": ".\\"
+    }
+  }
+}
